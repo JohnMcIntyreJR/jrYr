@@ -1,0 +1,20 @@
+---
+title: "Workshop code"
+author: "Jumping Rivers"
+output:
+  tufte::tufte_html: default
+vignette: >
+  %\VignetteIndexEntry{code}
+  \usepackage[utf8]{inputenc}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+
+```{r include = FALSE}
+library(tufte)
+knitr::opts_chunk$set()
+```
+
+
+```{r child = 'code_contents.Rmd'}
+```
