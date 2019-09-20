@@ -175,7 +175,7 @@ renderPlot(hist(rvs$data[, "length"],
 
 ## The `observe()` function
 ```{r, eval = FALSE, results="hide"}
-data(movies, package = "jrShiny")
+data(movies, package = "jrYr")
 selectInput("movie_type", label = "Movie genre", 
             c("Romance", "Action", "Animation"))
 rvs = reactiveValues(data = movies, sentence = NULL)
@@ -192,7 +192,7 @@ Doesn't really make sense to use an `observe()` here, just illustrating what it 
 
 ```{r, out.width="90%", message=FALSE, warning = FALSE}
 library("ggplot2")
-data(movies, package = "jrShiny")
+data(movies, package = "jrYr")
 g = ggplot(movies, aes(x = length, y = rating)) + 
   geom_point()
 g
@@ -208,7 +208,7 @@ ggplotly(g)
 ```{r, eval = FALSE, message=FALSE, warning = FALSE}
 library("ggplot2")
 library("plotly")
-data(movies, package = "jrShiny")
+data(movies, package = "jrYr")
 selectInput("movie_type", label = "Movie genre",
             c("Romance", "Action", "Animation"))
 rvs = reactiveValues(data = movies)
@@ -235,7 +235,7 @@ datatable(movies)
 library("ggplot2")
 library("plotly")
 library("DT")
-data(movies, package = "jrShiny")
+data(movies, package = "jrYr")
 selectInput("movie_type", label = "Movie genre",
             c("Romance", "Action", "Animation"))
 rvs = reactiveValues(data = movies)
