@@ -1,67 +1,151 @@
-# Shiny Basics - code
-
-## Useful links
-
-* http://shiny.rstudio.com/gallery
-* http://www.showmeshiny.com/
-* http://shiny.rstudio.com/tutorial/
-* http://shiny.rstudio.com/articles/
-* http://shiny.rstudio.com/gallery/widget-gallery.html
-* https://www.htmlwidgets.org/
-
-## Course package data 
-```{r message=FALSE}
+```{r, message=FALSE}
 library(shiny)
 data(movies, package="jrYr")
 ```
 
-## Input: control widgets
-### Select box
+# Introduction to Shiny
+## Shiny
 
-```{r, eval = FALSE}
+* https://goo.gl/tzZs3T
+* http://shiny.rstudio.com/gallery
+* http://www.showmeshiny.com/
+* http://shiny.rstudio.com/tutorial/
+* http://shiny.rstudio.com/articles/
+
+## Task
+
+Create a new R markdown document
+
+`File` -> `New File` -> `R markdown`
+
+
+## Code chunks
+
+```` ```{r} ````     
+`      # R code`     
+```` ``` ````
+
+* Everything between the back ticks is evaluated as R code
+
+## Chunk options
+## echo
+
+* For hiding a code chunk 
+
+```` ```{r, echo = FALSE} ````     
+`      # R code`     
+```` ``` ````
+
+## eval
+
+* Whether or not to actually run the code
+
+```` ```{r, eval = FALSE} ````     
+`      # R code`     
+```` ``` ````
+
+## Combining
+
+* Of course you can combine as many options as you want
+  
+```` ```{r, echo = FALSE, eval = FALSE} ````     
+`      # R code`     
+```` ``` ````
+
+## Shiny in R markdown
+
+* We can use Shiny functionality within an Rmarkdown file
+
+* Just create an R markdown file with the header
+
+\noindent`---`    
+`title: "First app"`    
+`runtime: shiny`    
+`---` 
+
+
+# Input: control widgets
+## Input: control widgets
+
+## Select box
+
+```{r, eval = FALSE, cache=FALSE}
 selectInput(inputId = "movie_type", # unique id 
             label = "Movie genre", # Text for web
-            choices = c("Romance", "Action", "Animation"), 
-            selected = "Action")
+            choices = c("romance", "action", "thriller"), 
+            selected = "action")
 ```
 
-### Slider 
+## Slider 
 
-```{r, eval = FALSE}
+```{r, eval = FALSE, cache=FALSE}
 sliderInput(inputId = "movie_rating", 
             label = "Movie rating", 
             min = 0, max = 10, value = 5)
 ```
 
-### Numeric input
+## Numeric input
 
-```{r, eval = FALSE}
+```{r, eval = FALSE, cache=FALSE}
 numericInput(inputId = "movie_length", 
           label = "Movie length", 
-          min = 1, max = 5220, value = 100)
+          min = 1, max = 330, value = 100)
 ```
 
-## render functions
-### Example: movies
+## Widgets
 
-```{r, eval = FALSE}
+1)  http://shiny.rstudio.com/gallery/widget-gallery.html
+
+
+# Rendered outputs
+## Rendered output
+
+Function | Output type
+---------|------------
+`renderPlot()` | R graphics output
+`renderPrint()` | printed output
+`renderTable()`	| Data frame, matrix
+`renderText()` | Character vectors
+
+## Example: movies
+
+```{r eval=FALSE, cache=FALSE}
 renderText(input$movie_type)
 ```
 
-### Example: movies
+## Example: movies
 
-```{r eval=FALSE}
+* If we want more than one line of code in the render function, we need `{}`
+
+```{r eval=FALSE, cache=FALSE}
 renderText({
   type = movies[,input$movie_type] == 1
   nrow(movies[type,])
 })
 ```
 Or
-```{r eval=FALSE}
+```{r eval=FALSE, cache=FALSE}
 renderPlot({
   type = movies[,input$movie_type] == 1
   hist(movies[type,]$length)
 })
+```
+
+## Task
+
+In the previous task we created a `selectInput()` to let the user choose a movie classification
+```{r, eval = FALSE, cache=FALSE}
+selectInput(inputId = "movie_type",
+            label = "Movie classification",
+            choices = c("U", "PG", "12A", "15", "18"), 
+            selected = "12A")
+```
+
+- Using `renderText()`, display the number of films within each `classification`. For example, the number of "PG" films 
+```{r,eval = FALSE, cache=FALSE}
+data(movies, package = "jrYr")
+pg_movies = movies[movies$classification == "PG",]
+nrow(pg_movies)
 ```
 
 # Reactive programming
@@ -69,128 +153,78 @@ renderPlot({
 
 This is inefficient
 
-```{r eval=FALSE}
+```{r eval=FALSE, cache=FALSE}
 renderText({
   type = movies[,input$movie_type] == 1
   nrow(movies[type,])
 })
+
 renderPlot({
   type = movies[,input$movie_type] == 1
   hist(movies[type,]$length)
 })
 ```
 
-## Solution: `reactive()`
+## Solution: `reactiveValues()` 
 
-```{r eval=FALSE}
-sub_movies = reactive({
-  type = movies[,input$movie_type] == 1
-  movies[type,]
+```{r eval=FALSE, cache=FALSE}
+rvs = reactiveValues(data = movies)
+```
+
+## Solution: `observe()`
+
+```{r, eval = FALSE, cache=FALSE}
+observe({
+    type = movies[,input$movie_type] == 1
+    rvs$data = movies[type,]
 })
 ```
-Gives
 
-```{r eval=FALSE}
-renderText(nrow(sub_movies()))
-renderPlot(hist(sub_movies()$length))
+## Solution
+
+```{r, eval = FALSE, cache=FALSE}
+rvs = reactiveValues(data = movies)
+
+observe({
+  type = movies[, input$movie_type] == 1
+  rvs$data = movies[type, ]
+})
+
+renderText({
+  nrow(rvs$data)
+})
+
+renderPlot({
+  hist(rvs$data$length)
+})
 ```
 
-## `eventReactive()`
-### Problem
+# Problem
+## Problem
 
 We may not want the app to update every time we change an input
 
-```{r eval=FALSE}
-selectInput("movie_genre", label = "Movie genre", 
-            c("Romance", "Action", "Animation"))
+## Solution: `observeEvent()`, `actionButton()`
 
-sub_movies = reactive({
-  type = movies[,input$movie_type] == 1
-  movies[type,]
-})
-#??
-```
+```{r, eval = FALSE, cache=FALSE}
+rvs = reactiveValues(data = movies)
 
-### Solution: `actionButton`, `actionLink` * `eventReactive()`
+actionButton("plot_button", "Plot it now!!!")
 
-```{r, eval = FALSE}
-selectInput("movie_genre", label = "Movie genre", 
-            c("Romance", "Action", "Animation"))
-actionButton("plot", "Plot it now!!")
-```
-
-```{r, eval = FALSE}
-sub_movies1 = eventReactive(input$plot,{
-  type = movies[,input$movie_genre] == 1
-  movies[type,]
-})
-renderPlot(hist(sub_movies1()$length))
-```
-
-## Solution: `reactiveValues` and `observeEvent`
-
-```{r eval=FALSE}
-rvs = reactiveValues(data=movies)
-```
-
-```{r eval=FALSE}
-observeEvent(input$romance, {
-    type = movies[, "Romance"] == 1
-    rvs$data = movies[type, ]
-})
-observeEvent(input$action, {
-    type = movies[, "Action"] == 1
-    rvs$data = movies[type, ]
-})
-renderPlot(hist(rvs$data[, "length"]))
-```
-
-## The `isolate` function
-### Problem
-
-```{r, eval = FALSE}
-sliderInput("n", "Sample size", 10, 500, 100)
-actionButton("romance", "Romance")
-actionButton("action", "Action")
-```
-
-
-```{r eval=FALSE}
-observeEvent(input$romance, {
-    m =  movies[movies[, "Romance"] == 1, ]
-    rows = sample(1:nrow(m), input$n)
-    rvs$data = m[rows, ]
-})
-# Similar for Action
-renderPlot(hist(rvs$data[, "length"], 
-                main=paste("Sample size:", input$n)))
-```
-
-### Solution: `isolate`
-
-```{r eval=FALSE}
-renderPlot(hist(rvs$data[, "length"], 
-                main=paste("Sample size:", isolate(input$n))))
-```
-
-## The `observe()` function
-```{r, eval = FALSE, results="hide"}
-data(movies, package = "jrYr")
-selectInput("movie_type", label = "Movie genre", 
-            c("Romance", "Action", "Animation"))
-rvs = reactiveValues(data = movies, sentence = NULL)
-observe({
-  rvs$data = movies[movies[, input$movie_type] == 1, ]
+observeEvent(input$plot, {
+  type = movies[, input$movie_type] == 1
+  rvs$data = movies[type, ]
 })
 
-renderPlot(hist(rvs$data[, "length"]))
+renderPlot({
+  hist(rvs$data$length)
+})
 ```
-Doesn't really make sense to use an `observe()` here, just illustrating what it does.
 
 # htmlwidgets
 ## The **plotly** package 
 
-```{r, out.width="90%", message=FALSE, warning = FALSE}
+```{r, eval = FALSE, cache=FALSE}
 library("ggplot2")
 data(movies, package = "jrYr")
 g = ggplot(movies, aes(x = length, y = rating)) + 
@@ -198,24 +232,29 @@ g = ggplot(movies, aes(x = length, y = rating)) +
 g
 ```
 
-```{r, message=FALSE, warning = FALSE}
+## The **plotly** package 
+
+```{r, eval = FALSE, cache=FALSE}
 library("plotly")
 ggplotly(g)
 ```
 
 ## Shiny and **plotly**
 
-```{r, eval = FALSE, message=FALSE, warning = FALSE}
+```{r, eval = FALSE, cache=FALSE}
 library("ggplot2")
 library("plotly")
 data(movies, package = "jrYr")
-selectInput("movie_type", label = "Movie genre",
-            c("Romance", "Action", "Animation"))
+selectInput(inputId = "movie_type", 
+            label = "Movie genre", 
+            choices = c("romance", "action", "thriller"))
 rvs = reactiveValues(data = movies)
 
-observeEvent(input$movie_type, {
-  rvs$data = movies[movies[, input$movie_type] == 1, ]
+observe({
+  type = movies[, input$movie_type] == 1
+  rvs$data = movies[type, ]
 })
+
 renderPlotly({
   ggplotly(ggplot(rvs$data, aes(x = length)) +
     geom_histogram())
@@ -224,47 +263,44 @@ renderPlotly({
 
 ## Interactive tables with DT
 
-```{r, message=FALSE, warning = FALSE}
+```{r, eval = FALSE, message=FALSE, warning = FALSE, cache=FALSE}
 library("DT")
 datatable(movies)
 ```
 
-## Shiny and **DT**
+## Interactive tables with DT
 
-```{r, eval = FALSE, message=FALSE, warning = FALSE}
+```{r, eval = FALSE, results = "hide", message=FALSE, warning = FALSE, cache=FALSE}
 library("ggplot2")
 library("plotly")
 library("DT")
 data(movies, package = "jrYr")
-selectInput("movie_type", label = "Movie genre",
-            c("Romance", "Action", "Animation"))
+selectInput(inputId = "movie_type",
+            label = "Movie genre",
+            choices = c("romance", "action", "thriller"))
 rvs = reactiveValues(data = movies)
 observeEvent(input$movie_type, {
   rvs$data = movies[movies[, input$movie_type] == 1, ]
 })
-renderPlotly({
-  ggplotly(ggplot(rvs$data, aes(x = length)) +
-    geom_histogram())
-})
 renderDataTable({
-  datatable(rvs$data[,1:5],
-            options = list(lengthMenu = c(5, 30, 50),
-                           pageLength = 5))
+  datatable(rvs$data[,1:5])
 })
 ```
 
 # A shiny app
 ## The `ui.R` file
 
-```{r eval=FALSE, results="hide", cache=FALSE, message=FALSE}
+```{r,eval = FALSE, results="hide", cache=FALSE, message=FALSE}
 library("shiny")
 fluidPage(
   titlePanel("Shiny happy people"), #title
   ## Sidebar with a slider input for no. of points
   sidebarLayout( 
     sidebarPanel(
-      sliderInput("n", "Number of points:", min = 1, 
-                                  max = 50, value = 30)
+      selectInput(inputId = "movie_type", # unique id 
+            label = "Movie genre", # Text for web
+            choices = c("romance", "action", "thriller"), 
+            selected = "action")
     ),
     ## Show a plot of the generated distribution
     mainPanel(plotOutput("scatter"))
@@ -274,18 +310,24 @@ fluidPage(
 
 ## The `server.R` file
 
-```{r eval = FALSE, results="hide", message=FALSE}
+```{r results="hide", message=FALSE,eval = FALSE, cache=FALSE}
 library("shiny")
+data(movies, package = "jrYr")
+
 # Function always has input & output
 function(input, output) {
-  # Expression that generates a plot. 
-  # A call to renderPlot indicates that:
-  #  1) It is "reactive" and therefore should 
-  #   re-execute automatically when inputs change
-  #  2) Its output type is a plot
-  output$scatter = renderPlot({plot(rnorm(input$n))})
+  rvs = reactiveValues(data = movies)
+  
+  observeEvent(input$movie_type, {
+    rvs$data = movies[movies[, input$movie_type] == 1,]
+  })
+  
+  output$scatter = renderPlot({
+    plot(x = rvs$data$duration, y = rvs$data$rating)
+  })
+  
 }
-``` 
+```
 
 ## Output objects
 
@@ -301,7 +343,7 @@ Output function | creates
 
 ## The `fluidPage` function
 
-```{r eval = FALSE}
+```{r results="hide", cache=FALSE,eval = FALSE}
 fluidPage(
   titlePanel("Title panel"),# Title
   ## Sidebar style
@@ -314,7 +356,7 @@ fluidPage(
 
 ## `sidebarLayout`: swap sides
 
-```{r eval = FALSE}
+```{r results="hide", cache=FALSE,eval = FALSE}
 sidebarLayout(position="right",
   sidebarPanel("The sidebar"),
   mainPanel("Main panel")
@@ -323,7 +365,7 @@ sidebarLayout(position="right",
 
 ## `sidebarLayout`
 
-```{r eval = FALSE}
+```{r results="hide",eval = FALSE, cache=FALSE}
 sidebarLayout(
   sidebarPanel("The sidebar", p("Choose an option")),
   mainPanel("Main panel")
@@ -332,7 +374,7 @@ sidebarLayout(
 
 ## Layout
 
-```{r eval = FALSE}
+```{r cache=FALSE,eval = FALSE}
 ui = fluidPage(
   titlePanel("I love movies"), #Title
   fluidRow( # Define a row
@@ -346,102 +388,3 @@ ui = fluidPage(
   )
 )
 ```
-
-## Tabset layouts
-
-```{r, eval=FALSE}
-mainPanel(
-  tabsetPanel(type = "tabs", 
-    tabPanel("Plot", plotOutput("plot")), 
-    tabPanel("Summary", verbatimTextOutput("summary")), 
-    tabPanel("Table", tableOutput("table"))
-  )
-)
-``` 
-
-# **shinydashboard**
-## The **shinydashboard** package
-
-```{r, eval = FALSE}
-dashboardPage(
-  dashboardHeader(title = "My first app"),
-  dashboardSidebar(), 
-  dashboardBody()
-)
-```
-
-## The **shinydashboard** package
-
-```{r, eval = FALSE}
-dashboardPage(
-  dashboardHeader(title = "My first app"),
-  dashboardSidebar(
-    sidebarMenu(
-      menuItem("Page 1"), 
-      menuItem("Page 2")
-    )
-  ), 
-  dashboardBody()
-)
-```
-
-## The **shinydashboard** package
-
-```{r, eval = FALSE}
-dashboardPage(
-  dashboardHeader(title = "My first app"),
-  dashboardSidebar(
-    sidebarMenu(
-      menuItem("Page 1", tabName = "p1"), 
-      menuItem("Page 2", tabName = "p2")
-    )
-  ), 
-  dashboardBody(
-    tabItems(
-      tabItem("p1", h2("This is page 1")), 
-      tabItem("p2", h2("This is page 2"))
-    )
-  )
-)
-```
-
-## The **shinydashboard** package
-
-```{r, eval = FALSE}
-dashboardPage(
-  dashboardHeader(title = "My first app"),
-  dashboardSidebar(
-    sidebarMenu(
-      menuItem("Page 1", tabName = "p1"), 
-      menuItem("Page 2", 
-               menuSubItem("Sub page 1", tabName = "sp1"), 
-               menuSubItem("Sub page 2", tabName = "sp2"))
-    )
-  ), 
-  dashboardBody(
-    tabItems(
-      tabItem("p1", h2("This is page 1")), 
-      tabItem("sp1", h2("This is page 2, sub page 1")), 
-      tabItem("sp2", h2("This is page 2, sub page 2"))
-    )
-  )
-)
-```
-
-# Row layout
-## Example Row layout
-
-```{r, eval = FALSE}
-dashboardBody(
-  fluidRow(
-    box(plotOutput("plot"), 
-        title = "This is my plot", 
-        width = 8), 
-    box(sliderInput("n", "slider", 
-                    min = 1, max = 100, value = 10), 
-        title = "This is my slider", 
-        width = 4)
-  )
-)
-```
-

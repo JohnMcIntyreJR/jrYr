@@ -11,19 +11,6 @@
 #' data(movies)
 NULL
 
-#' New movies data
-#'
-#' Some data for the workshop
-#'
-#'@name movies_new
-#'@docType data
-#'@usage data(movies_new)
-#'@return A tibble
-#'@keywords datasets
-#'@examples
-#' data(movies_new)
-NULL
-
 #' okcupid data
 #'
 #' Some data for the workshop
