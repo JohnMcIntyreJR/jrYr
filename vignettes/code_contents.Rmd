@@ -1,6 +1,6 @@
 ```{r, message=FALSE}
 library(shiny)
-data(movies, package="jrYr")
+data(movies, package = "jrYr")
 ```
 
 # Introduction to Shiny
@@ -70,26 +70,26 @@ Create a new R markdown document
 ## Select box
 
 ```{r, eval = FALSE, cache=FALSE}
-selectInput(inputId = "movie_type", # unique id 
+selectInput(inputId = "movie_type", # unique id
             label = "Movie genre", # Text for web
-            choices = c("romance", "action", "thriller"), 
+            choices = c("romance", "action", "thriller"),
             selected = "action")
 ```
 
 ## Slider 
 
 ```{r, eval = FALSE, cache=FALSE}
-sliderInput(inputId = "movie_rating", 
-            label = "Movie rating", 
+sliderInput(inputId = "movie_rating",
+            label = "Movie rating",
             min = 0, max = 10, value = 5)
 ```
 
 ## Numeric input
 
 ```{r, eval = FALSE, cache=FALSE}
-numericInput(inputId = "movie_length", 
-          label = "Movie length", 
-          min = 1, max = 330, value = 100)
+numericInput(inputId = "movie_length",
+             label = "Movie length",
+             min = 1, max = 330, value = 100)
 ```
 
 ## Widgets
@@ -119,15 +119,15 @@ renderText(input$movie_type)
 
 ```{r eval=FALSE, cache=FALSE}
 renderText({
-  type = movies[,input$movie_type] == 1
-  nrow(movies[type,])
+  type = movies[, input$movie_type] == 1
+  nrow(movies[type, ])
 })
 ```
 Or
 ```{r eval=FALSE, cache=FALSE}
 renderPlot({
-  type = movies[,input$movie_type] == 1
-  hist(movies[type,]$length)
+  type = movies[, input$movie_type] == 1
+  hist(movies[type, ]$length)
 })
 ```
 
@@ -137,14 +137,14 @@ In the previous task we created a `selectInput()` to let the user choose a movie
 ```{r, eval = FALSE, cache=FALSE}
 selectInput(inputId = "movie_type",
             label = "Movie classification",
-            choices = c("U", "PG", "12A", "15", "18"), 
+            choices = c("U", "PG", "12A", "15", "18"),
             selected = "12A")
 ```
 
 - Using `renderText()`, display the number of films within each `classification`. For example, the number of "PG" films 
 ```{r,eval = FALSE, cache=FALSE}
 data(movies, package = "jrYr")
-pg_movies = movies[movies$classification == "PG",]
+pg_movies = movies[movies$classification == "PG", ]
 nrow(pg_movies)
 ```
 
@@ -155,13 +155,13 @@ This is inefficient
 
 ```{r eval=FALSE, cache=FALSE}
 renderText({
-  type = movies[,input$movie_type] == 1
-  nrow(movies[type,])
+  type = movies[, input$movie_type] == 1
+  nrow(movies[type, ])
 })
 
 renderPlot({
-  type = movies[,input$movie_type] == 1
-  hist(movies[type,]$length)
+  type = movies[, input$movie_type] == 1
+  hist(movies[type, ]$length)
 })
 ```
 
@@ -175,8 +175,8 @@ rvs = reactiveValues(data = movies)
 
 ```{r, eval = FALSE, cache=FALSE}
 observe({
-    type = movies[,input$movie_type] == 1
-    rvs$data = movies[type,]
+    type = movies[, input$movie_type] == 1
+    rvs$data = movies[type, ]
 })
 ```
 
@@ -227,7 +227,7 @@ renderPlot({
 ```{r, eval = FALSE, cache=FALSE}
 library("ggplot2")
 data(movies, package = "jrYr")
-g = ggplot(movies, aes(x = length, y = rating)) + 
+g = ggplot(movies, aes(x = length, y = rating)) +
   geom_point()
 g
 ```
@@ -245,8 +245,8 @@ ggplotly(g)
 library("ggplot2")
 library("plotly")
 data(movies, package = "jrYr")
-selectInput(inputId = "movie_type", 
-            label = "Movie genre", 
+selectInput(inputId = "movie_type",
+            label = "Movie genre",
             choices = c("romance", "action", "thriller"))
 rvs = reactiveValues(data = movies)
 
@@ -283,7 +283,7 @@ observeEvent(input$movie_type, {
   rvs$data = movies[movies[, input$movie_type] == 1, ]
 })
 renderDataTable({
-  datatable(rvs$data[,1:5])
+  datatable(rvs$data[, 1:5])
 })
 ```
 
@@ -295,12 +295,12 @@ library("shiny")
 fluidPage(
   titlePanel("Shiny happy people"), #title
   ## Sidebar with a slider input for no. of points
-  sidebarLayout( 
+  sidebarLayout(
     sidebarPanel(
-      selectInput(inputId = "movie_type", # unique id 
-            label = "Movie genre", # Text for web
-            choices = c("romance", "action", "thriller"), 
-            selected = "action")
+      selectInput(inputId = "movie_type", # unique id
+                  label = "Movie genre", # Text for web
+                  choices = c("romance", "action", "thriller"),
+                  selected = "action")
     ),
     ## Show a plot of the generated distribution
     mainPanel(plotOutput("scatter"))
@@ -317,15 +317,15 @@ data(movies, package = "jrYr")
 # Function always has input & output
 function(input, output) {
   rvs = reactiveValues(data = movies)
-  
+
   observeEvent(input$movie_type, {
-    rvs$data = movies[movies[, input$movie_type] == 1,]
+    rvs$data = movies[movies[, input$movie_type] == 1, ]
   })
-  
+
   output$scatter = renderPlot({
     plot(x = rvs$data$duration, y = rvs$data$rating)
   })
-  
+
 }
 ```
 
@@ -345,7 +345,7 @@ Output function | creates
 
 ```{r results="hide", cache=FALSE,eval = FALSE}
 fluidPage(
-  titlePanel("Title panel"),# Title
+  titlePanel("Title panel"), # Title
   ## Sidebar style
   sidebarLayout(
     sidebarPanel("The sidebar"),
@@ -357,7 +357,7 @@ fluidPage(
 ## `sidebarLayout`: swap sides
 
 ```{r results="hide", cache=FALSE,eval = FALSE}
-sidebarLayout(position="right",
+sidebarLayout(position = "right",
   sidebarPanel("The sidebar"),
   mainPanel("Main panel")
 )
@@ -377,13 +377,13 @@ sidebarLayout(
 ```{r cache=FALSE,eval = FALSE}
 ui = fluidPage(
   titlePanel("I love movies"), #Title
-  fluidRow( # Define a row
+  fluidRow(# Define a row
     column(4, # Two columns: width 4 & 8
            wellPanel(
-             selectInput("movie_type", label = "Movie genre", 
+             selectInput("movie_type", label = "Movie genre",
                          c("Romance", "Action", "Animation"))
-           )       
-    ),
+           )
+     ),
     column(8, plotOutput("scatter"))
   )
 )

@@ -1,24 +1,26 @@
-Package: jrYr
 Type: Package
+Package: jrYr
 Title: Package for the whyR Poland shiny workshop
 Version: 0.1.0
 Author: Theo Roe
 Maintainer: Theo Roe <theo@jumpingrivers.com>
-Description: Package for the whyR Poland workshop.
-    Contains code from the slides and data sets.
+Description: Package for the whyR Poland workshop.  Contains
+    code from the slides and data sets.
+License: GPL-3
+Depends: 
+    R (>= 3.1.0)
 Imports:
-    shiny,
-    rmarkdown,
-    plotly,
+    dplyr,
     DT,
     ggplot2,
-    dplyr,
-    shinydashboard,
     knitr,
+    plotly,
+    rmarkdown,
+    shiny,
+    shinydashboard,
     tufte
-Depends: R (>= 3.1.0)
-License: GPL-3
+VignetteBuilder: 
+    knitr
 Encoding: UTF-8
 LazyData: true
-VignetteBuilder: knitr
 RoxygenNote: 6.1.1
