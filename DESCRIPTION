@@ -1,7 +1,7 @@
 Type: Package
 Package: jrYr
 Title: Package for the whyR Poland shiny workshop
-Version: 0.1.0
+Version: 0.1.1
 Author: Theo Roe
 Maintainer: Theo Roe <theo@jumpingrivers.com>
 Description: Package for the whyR Poland workshop.  Contains
